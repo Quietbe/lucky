@@ -3,7 +3,7 @@ import json
 import os
 import re
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Queue, Manager, Pool
 from threading import Thread
 
 import numpy as np
@@ -97,7 +97,6 @@ class DataFormat:
         :param price: 价格
         :return: 处理后的价格
         """
-        import re
         if pd.isnull(price):
             return price
         price = str(price)
@@ -109,17 +108,12 @@ class DataFormat:
             if '$' in price:  # 去除价格前面的$
                 price = price.replace('$', '')
                 price = price.strip()
-            # if ',' in price:  # 去除价格中间的,
-            #     price = price.replace(',', '')
-            #     price = price.strip()
             if '€' in price:
                 price = price.replace('€', '')
                 price = price.strip()
             if ',' in price:
                 price = price.replace(',', '')
                 price = price.strip()
-        # 只保price中的数字和.
-        # price = ''.join(re.findall(r'\d+\.?\d*', price))
 
         return price
 
@@ -132,8 +126,10 @@ class DataFormat:
         if pd.isnull(image):
             return image
         if image is not None and image != '':
-            if '?' in image:  # 去除图片后面的参数
-                image = image.split('?')[0]
+            image1 = image.split('?')[0]
+            if image1.endswith('.jpg') or image1.endswith('.png') or image1.endswith('.jpeg') or image1.endswith(
+                    '.gif'):
+                image = image1
             if ' ' in image:  # 去除图片后面的空格
                 image = image.strip()
             if image.startswith('http'):  # 如果图片路径是以http开头的
@@ -154,6 +150,7 @@ class DataFormat:
             gallery_list = gallery.split(';')
             for i in range(len(gallery_list)):
                 gallery_list[i] = self.image_format(gallery_list[i])
+            gallery_list = list(set(gallery_list))
             gallery = ';'.join(gallery_list)
         return gallery
 
@@ -167,6 +164,7 @@ class DataFormat:
             return color
         if color is not None and color != '':
             color_list = color.split(',')
+            color_list = list(set(color_list))
             for i in range(len(color_list)):
                 color_list[i] = color_list[i].strip()
             color = ','.join(color_list)
@@ -182,6 +180,7 @@ class DataFormat:
             return size
         if size is not None and size != '':
             size_list = size.split(',')
+            size_list = list(set(size_list))
             for i in range(len(size_list)):
                 size_list[i] = size_list[i].strip()
             size = ','.join(size_list)
@@ -246,18 +245,20 @@ class DataFormat:
         return pageurl
 
 
-error_text = {}  # {'文件名': '[错误信息，错误信息]'}
+# error_text = {}  # {'文件名': '[错误信息，错误信息]'}
 
 
 def jc(file_name, error_text):
+    # global error_text
+    error_text_ = {}
     file_read = pd.read_excel(file_name, sheet_name=0)
     # 循环每一条数据 对数据进行 处理
     print('当前文件数据量为：', len(file_read))
     columns_between = file_read.columns[file_read.columns.get_loc('gallery') + 1:file_read.columns.get_loc('sku')]
-    error_text[file_name] = {"Pageurl": [], "title": [], "category": [], "price": [], "image": [], "gallery": [],
+    error_text_[file_name] = {"Pageurl": [], "title": [], "category": [], "price": [], "image": [], "gallery": [],
                              "description": []}
     for col in columns_between:
-        error_text[file_name][col] = []
+        error_text_[file_name][col] = []
 
     for i in range(len(file_read)):
         # 读取每一条数据
@@ -266,7 +267,7 @@ def jc(file_name, error_text):
         if pd.isnull(Pageurl):
             print('第{}条数据的Pageurl为空'.format(i + 2))
             # error_text[file_name].append('第{}条数据的Pageurl为空'.format(i + 2))
-            error_text[file_name]['Pageurl'].append('第{}条数据的Pageurl为空'.format(i + 2))
+            error_text_[file_name]['Pageurl'].append('第{}条数据的Pageurl为空'.format(i + 2))
         title = str(data['title'])
         if pd.isnull(title):
             print('第{}条数据的title为空'.format(i + 2))
@@ -275,13 +276,13 @@ def jc(file_name, error_text):
             if title != title1:
                 print('第{}条数据的title有空格'.format(i + 2))
                 # error_text[file_name].append('第{}条数据的title有空格'.format(i + 2))
-                error_text[file_name]['title'].append('第{}条数据的 title 前后有空格'.format(i + 2))
+                error_text_[file_name]['title'].append('第{}条数据的 title 前后有空格'.format(i + 2))
         # brand = data['brand']
         category = data['category']
         if pd.isnull(category):
             print('第{}条数据的category为空'.format(i + 2))
             # error_text[file_name].append('第{}条数据的category为空'.format(i + 2))
-            error_text[file_name]['category'].append('第{}条数据的category为空'.format(i + 2))
+            error_text_[file_name]['category'].append('第{}条数据的category为空'.format(i + 2))
         else:
             if "||" not in category:
                 print('第{}条数据的category只有一个面包屑'.format(i + 2))
@@ -292,33 +293,33 @@ def jc(file_name, error_text):
                     if cate != cate1:
                         print('第{}条数据的category有空格'.format(i + 2))
                         # error_text[file_name].append('第{}条数据的category有空格'.format(i + 2))
-                        error_text[file_name]['category'].append('第{}条数据的 category 前后有空格'.format(i + 2))
+                        error_text_[file_name]['category'].append('第{}条数据的 category 前后有空格'.format(i + 2))
                         break
         # 拿到price
         price = data['price']
         if pd.isnull(price):
             print('第{}条数据的price为空'.format(i + 2))
             # error_text[file_name].append('第{}条数据的price为空'.format(i + 2))
-            error_text[file_name]['price'].append('第{}条数据的price为空'.format(i + 2))
+            error_text_[file_name]['price'].append('第{}条数据的price为空'.format(i + 2))
         else:
             for fh in ['-', '£', '$', '€', ',']:
                 if fh in str(price):
                     print('第{}条数据的price有问题'.format(i + 2))
                     # error_text[file_name].append('第{}条数据的price格式不正确'.format(i + 2))
-                    error_text[file_name]['price'].append('第{}条数据的price格式不正确'.format(i + 2))
+                    error_text_[file_name]['price'].append('第{}条数据的price格式不正确'.format(i + 2))
                     break
         image = data['image']
         if pd.isnull(image):
             print('第{}条数据的 主图 为空'.format(i + 2))
             # error_text[file_name].append('第{}条数据的 主图 为空'.format(i + 2))
-            error_text[file_name]['image'].append('第{}条数据的 主图 为空'.format(i + 2))
+            error_text_[file_name]['image'].append('第{}条数据的 主图 为空'.format(i + 2))
         else:
             gallery = data['gallery']
             if not pd.isnull(gallery):
                 if image in gallery:
                     print('第{}条数据的 主图 与 图库 重复'.format(i + 2))
                     # error_text[file_name].append('第{}条数据的 主图 与 图库 重复'.format(i + 2))
-                    error_text[file_name]['image'].append('第{}条数据的 主图 与 图库 重复'.format(i + 2))
+                    error_text_[file_name]['image'].append('第{}条数据的 主图 与 图库 重复'.format(i + 2))
         description = data['description']
         if pd.isnull(description):
             print('第{}条数据的description为空'.format(i + 2))
@@ -330,7 +331,7 @@ def jc(file_name, error_text):
             if num > 0:
                 print('第{}条数据的description有{}个标签'.format(i + 2, num))
                 # error_text[file_name].append('第{}条数据的description有{}个标签'.format(i + 2, num))
-                error_text[file_name]['description'].append('第{}条数据的description有{}个标签'.format(i + 2, num))
+                error_text_[file_name]['description'].append('第{}条数据的description有{}个标签'.format(i + 2, num))
         # 判断选项
         for column in columns_between:
             if pd.isnull(data[column]):
@@ -339,45 +340,70 @@ def jc(file_name, error_text):
             if len(select_list) != len(set(select_list)):
                 print('第{}条数据的{}有重复'.format(i + 2, column))
                 # error_text[file_name].append('第{}条数据的{}有重复'.format(i + 2, column))
-                error_text[file_name][column].append('第{}条数据的{}有重复'.format(i + 2, column))
+                error_text_[file_name][column].append('第{}条数据的{}有重复'.format(i + 2, column))
             for select in select_list:
                 select1 = select.strip()
                 if select != select1:
                     print('第{}条数据的 {} 前后有空格'.format(i + 2, column))
                     # error_text[file_name].append('第{}条数据的{}有空格'.format(i + 2, column))
-                    error_text[file_name][column].append('第{}条数据的 {} 前后有空格'.format(i + 2, column))
+                    error_text_[file_name][column].append('第{}条数据的 {} 前后有空格'.format(i + 2, column))
                     break
             if '' in select_list:
                 print('第{}条数据的{}有空元素'.format(i + 2, column))
                 # error_text[file_name].append('第{}条数据的{}有空元素'.format(i + 2, column))
-                error_text[file_name][column].append('第{}条数据的{}有空元素'.format(i + 2, column))
+                error_text_[file_name][column].append('第{}条数据的{}有空元素'.format(i + 2, column))
+    # queue.put(error_text)
+    error_text[file_name] = json.dumps(error_text_[file_name])
 
 
 def xlsx_format_cope():
     """
     对xlsx文件进行基础格式检查
     """
-    global error_text
     # 获取当前路径下的所有文件和文件夹
     files = os.listdir(os.getcwd())
     # 仅保留.xlsx文件
     xlsx_files = [file for file in files if file.endswith('.xlsx')]
-    threads = []
+
+    # threads = []
+    # for file_name in xlsx_files:
+    #     if '单独' in file_name:
+    #         print('处理的文件名为：', file_name)
+    #         t = Thread(target=jc, args=(file_name,))
+    #         t.start()
+    #         threads.append(t)
+    # for t in threads:
+    #     t.join()
+
+    # queue = Queue()
+    # Processs = []
+    # for file_name in xlsx_files:
+    #     if '单独' in file_name:
+    #         print('处理的文件名为：', file_name)
+    #         p = Process(target=jc, args=(file_name, queue,))
+    #         p.start()
+    #         Processs.append(p)
+    # for p in Processs:
+    #     p.join()
+    #     p_res = queue.get()
+    #     print('t_data:', p_res)
+
+    manager = Manager()
+    error_text = manager.dict()
+    pool = Pool(processes=4)
     for file_name in xlsx_files:
         if '单独' in file_name:
             print('处理的文件名为：', file_name)
-            t = Thread(target=jc, args=(file_name, error_text))
-            t.start()
-            threads.append(t)
-    for t in threads:
-        t.join()
-
-    # for key, value in error_text.items():
-    #     print(key, value if len(value) < 10 else value[:10])
-    #     print('错误信息数量：', len(value))
+            pool.apply_async(jc, (file_name, error_text))
+    pool.close()
+    pool.join()
+    # error_text = dict(error_text)
+    print('error_text:', error_text)
 
     for key, value in error_text.items():
         print(' 文件：' + key)
+        value = json.loads(value)
+        print('value:', value)
         for k, v in value.items():
             if len(v) > 0:
                 print(k, f'({len(v)}): ', v if len(v) < 10 else v[:10])
@@ -389,4 +415,3 @@ def xlsx_format_cope():
 if __name__ == '__main__':
     input('只支持英文表格，中文表格请先转换为英文表格，按任意键继续')
     xlsx_format_cope()
-
