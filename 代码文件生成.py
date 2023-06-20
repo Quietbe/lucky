@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import json
 import os
+import random
 import re
 import time
 
@@ -112,7 +113,7 @@ class DataFormat:
             if ',' in price:
                 price = price.replace(',', '')
                 price = price.strip()
-
+        price = price.strip()
         return price
 
     def image_format(self, image):
@@ -313,7 +314,6 @@ def xlsx_format_cope():
             if image in gallery:
                 gallery.remove(image)
             gallery = ';'.join(gallery)
-
         # 拿到description
         description = data['description']
         description = DataFormat.description_format(description)
@@ -323,8 +323,7 @@ def xlsx_format_cope():
         if not pd.isnull(value1) and value1 != '':
             value1 = json.loads(value1)
             for key, value in value1.items():
-                value1_key = key
-            # key, value1_key = list(value1.items())[0]
+                value1_key = key.strip()
             if value1_key not in select_list:
                 select_list.append(value1_key)
 
@@ -332,8 +331,7 @@ def xlsx_format_cope():
         if not pd.isnull(value2) and value2 != '':
             value2 = json.loads(value2)
             for key, value in value2.items():
-                value2_key = key
-            # key, value2_key = list(value2.items())[0]
+                value2_key = key.strip()
             if value2_key not in select_list:
                 select_list.append(value2_key)
 
@@ -341,8 +339,7 @@ def xlsx_format_cope():
         if not pd.isnull(value3) and value3 != '':
             value3 = json.loads(value3)
             for key, value in value3.items():
-                value3_key = key
-            # key, value3_key = list(value3.items())[0]
+                value3_key = key.strip()
             if value3_key not in select_list:
                 select_list.append(value3_key)
 
@@ -350,10 +347,41 @@ def xlsx_format_cope():
         if not pd.isnull(value4) and value4 != '':
             value4 = json.loads(value4)
             for key, value in value4.items():
-                value4_key = key
-            # key, value4_key = list(value4.items())[0]
+                value4_key = key.strip()
             if value4_key not in select_list:
                 select_list.append(value4_key)
+
+        value5 = data['value5'] if 'value5' in data else ''
+        if not pd.isnull(value5) and value5 != '':
+            value5 = json.loads(value5)
+            for key, value in value5.items():
+                value5_key = key.strip()
+            if value5_key not in select_list:
+                select_list.append(value5_key)
+
+        value6 = data['value6'] if 'value6' in data else ''
+        if not pd.isnull(value6) and value6 != '':
+            value6 = json.loads(value6)
+            for key, value in value6.items():
+                value6_key = key.strip()
+            if value6_key not in select_list:
+                select_list.append(value6_key)
+
+        value7 = data['value7'] if 'value7' in data else ''
+        if not pd.isnull(value7) and value7 != '':
+            value7 = json.loads(value7)
+            for key, value in value7.items():
+                value7_key = key.strip()
+            if value7_key not in select_list:
+                select_list.append(value7_key)
+
+        value8 = data['value8'] if 'value8' in data else ''
+        if not pd.isnull(value8) and value8 != '':
+            value8 = json.loads(value8)
+            for key, value in value8.items():
+                value8_key = key.strip()
+            if value8_key not in select_list:
+                select_list.append(value8_key)
 
         # 覆盖原数据
         file_read.loc[i, 'PageUrl'] = Pageurl
@@ -364,10 +392,14 @@ def xlsx_format_cope():
         file_read.loc[i, 'image'] = image
         file_read.loc[i, 'gallery'] = gallery
         file_read.loc[i, 'description'] = description
-        file_read.loc[i, 'value1'] = data['value1']
-        file_read.loc[i, 'value2'] = data['value2']
-        file_read.loc[i, 'value3'] = data['value3']
-        file_read.loc[i, 'value4'] = data['value4']
+        file_read.loc[i, 'value1'] = data['value1'] if 'value1' in data else ''
+        file_read.loc[i, 'value2'] = data['value2'] if 'value2' in data else ''
+        file_read.loc[i, 'value3'] = data['value3'] if 'value3' in data else ''
+        file_read.loc[i, 'value4'] = data['value4'] if 'value4' in data else ''
+        file_read.loc[i, 'value5'] = data['value5'] if 'value5' in data else ''
+        file_read.loc[i, 'value6'] = data['value6'] if 'value6' in data else ''
+        file_read.loc[i, 'value7'] = data['value7'] if 'value7' in data else ''
+        file_read.loc[i, 'value8'] = data['value8'] if 'value8' in data else ''
 
         print('第', i, '条数据处理完成')
 
@@ -376,11 +408,6 @@ def xlsx_format_cope():
     rows = file_read.shape[0]
 
     # PageUrl	ID	产品名称	品牌名称	产品分类	产品封面	产品图片	产品SKU	产品价格	折扣价格	货币标识	产品描述	产品简介	SEO标题	SEO描述	SEO标签	多选项	Size    Color
-    # 删除 PageUrl 重复的行
-    file_read.drop_duplicates(subset=['PageUrl'], keep='first', inplace=True)
-    print('删除Url重复的行数：', rows - file_read.shape[0])
-    rows = file_read.shape[0]
-
     # 删除 产品名称为空的行
     file_read.dropna(subset=['title'], inplace=True)
     print('删除产品名称为空的行数：', rows - file_read.shape[0])
@@ -391,9 +418,13 @@ def xlsx_format_cope():
     print('删除产品价格为空的行数：', rows - file_read.shape[0])
     rows = file_read.shape[0]
 
+    # 删除 PageUrl 重复的行
+    file_read.drop_duplicates(subset=['PageUrl'], keep='first', inplace=True)
+    print('删除Url重复的行数：', rows - file_read.shape[0])
+    rows = file_read.shape[0]
+
     # 将price转换为float类型
     file_read['price'] = file_read['price'].astype(float)
-
     # 删除 产品价格不在 3-10000 之间的行
     file_read = file_read[(file_read['price'] >= 3) & (file_read['price'] <= 10000)]
     print('删除产品价格不在 3-10000 之间的行数：', rows - file_read.shape[0])
@@ -432,9 +463,7 @@ def xlsx_format_cope():
         index.append(select)
     index = index + ['sku', 'price', 'sprice', 'description']
     # print("index:", index)
-
     print(file_read)
-
     pd2 = pd.DataFrame(columns=index)
     for i in range(len(file_read)):
         data = file_read.iloc[i]
@@ -463,38 +492,82 @@ def xlsx_format_cope():
         if not pd.isnull(value1) and value1 != '':
             value1 = json.loads(value1)
             for key, value in value1.items():
-                value1_key = key
+                value1_key = key.strip()
                 if value1_key in select_list:
-                    value = [i for i in value if i != '']
-                    value = list(set(value))
-                    select_name[value1_key] = ','.join(value)
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value1_key] = ','.join(value_)
         value2 = data['value2'] if 'value2' in data else ''
         if not pd.isnull(value2) and value2 != '':
             value2 = json.loads(value2)
             for key, value in value2.items():
-                value2_key = key
+                value2_key = key.strip()
                 if value2_key in select_list:
-                    value = [i for i in value if i != '']
-                    value = list(set(value))
-                    select_name[value2_key] = ','.join(value)
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value2_key] = ','.join(value_)
         value3 = data['value3'] if 'value3' in data else ''
         if not pd.isnull(value3) and value3 != '':
             value3 = json.loads(value3)
             for key, value in value3.items():
-                value3_key = key
+                value3_key = key.strip()
                 if value3_key in select_list:
-                    value = [i for i in value if i != '']
-                    value = list(set(value))
-                    select_name[value3_key] = ','.join(value)
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value3_key] = ','.join(value_)
         value4 = data['value4'] if 'value4' in data else ''
         if not pd.isnull(value4) and value4 != '':
             value4 = json.loads(value4)
             for key, value in value4.items():
-                value4_key = key
+                value4_key = key.strip()
                 if value4_key in select_list:
-                    value = [i for i in value if i != '']
-                    value = list(set(value))
-                    select_name[value4_key] = ','.join(value)
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value4_key] = ','.join(value_)
+        value5 = data['value5'] if 'value5' in data else ''
+        if not pd.isnull(value5) and value5 != '':
+            value5 = json.loads(value5)
+            for key, value in value5.items():
+                value5_key = key.strip()
+                if value5_key in select_list:
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value5_key] = ','.join(value_)
+        value6 = data['value6'] if 'value6' in data else ''
+        if not pd.isnull(value6) and value6 != '':
+            value6 = json.loads(value6)
+            for key, value in value6.items():
+                value6_key = key.strip()
+                if value6_key in select_list:
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value6_key] = ','.join(value_)
+        value7 = data['value7'] if 'value7' in data else ''
+        if not pd.isnull(value7) and value7 != '':
+            value7 = json.loads(value7)
+            for key, value in value7.items():
+                value7_key = key.strip()
+                if value7_key in select_list:
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value7_key] = ','.join(value_)
+        value8 = data['value8'] if 'value8' in data else ''
+        if not pd.isnull(value8) and value8 != '':
+            value8 = json.loads(value8)
+            for key, value in value8.items():
+                value8_key = key.strip()
+                if value8_key in select_list:
+                    value = [str(i).strip() for i in value if i != '']
+                    value_ = list(set(value))
+                    value_.sort(key=value.index)
+                    select_name[value8_key] = ','.join(value_)
 
         data = [Pageurl, '', title, brand, category, '', image, gallery] + list(select_name.values()) + ['', price, '',
                                                                                                          description]
@@ -517,7 +590,16 @@ def xlsx_format_cope():
         else:
             pd2[index] = ''
     # print(pd2.index)
-    money = file_read['money'][0]
+    try:
+        money = file_read['money'][0]
+    except Exception as e:
+        while True:
+            print('当前货币标识为空，请输入货币标识,商品链接为：', pd2['PageUrl'][random.randint(0, len(pd2) - 1)])
+            money = input('请在money中输入货币标识，例如：USD :')
+            if len(money) == 3:
+                break
+            else:
+                print('输入错误，请重新输入--->')
     # print('money:', money)
     df = pd2[data_index]
     df['money'] = money
@@ -529,13 +611,11 @@ def xlsx_format_cope():
     df.to_excel(f'{out_chfile_name}.xlsx', sheet_name='Sheet', index=False, header=False)
     print('保存中文表格成功....\n 程序结束....')
 
+
 if __name__ == '__main__':
     xlsx_format_cope()
 
-
-
-
-#******************************************************
+# ******************************************************
 # 2023-06-13更新：
 # 1.增加了图片去重处理(主图不在附图中，附图不重复)
 # 2.修改了4个多选项列的bug
@@ -543,3 +623,8 @@ if __name__ == '__main__':
 # 3.删除了对 描述、品牌 为空的行删除处理的代码
 # 2023-06-14更新：
 # 1.增加了图片切割处理，如果图片链接切割后不是.png或.jpg结尾的，就不切割
+#
+# 2023-06-20更新：
+# 1.增加了多选项的去重排序，保持原有顺序
+# 2.增加了货币标识的输入，如果货币标识为空，就输入货币标识
+# 3.增加了对多选项内容和选项名的处理，避免格式错误
