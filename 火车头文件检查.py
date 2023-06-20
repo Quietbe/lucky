@@ -2,11 +2,7 @@
 import json
 import os
 import re
-import time
-from multiprocessing import Process, Queue, Manager, Pool
-from threading import Thread
-
-import numpy as np
+from multiprocessing import Manager, Pool
 import pandas as pd
 
 
@@ -316,6 +312,7 @@ def jc(file_name, error_text):
         else:
             gallery = data['gallery']
             if not pd.isnull(gallery):
+                gallery = gallery.split(';')
                 if image in gallery:
                     print('第{}条数据的 主图 与 图库 重复'.format(i + 2))
                     # error_text[file_name].append('第{}条数据的 主图 与 图库 重复'.format(i + 2))
@@ -355,7 +352,6 @@ def jc(file_name, error_text):
     # queue.put(error_text)
     error_text[file_name] = json.dumps(error_text_[file_name])
 
-
 def xlsx_format_cope():
     """
     对xlsx文件进行基础格式检查
@@ -364,29 +360,6 @@ def xlsx_format_cope():
     files = os.listdir(os.getcwd())
     # 仅保留.xlsx文件
     xlsx_files = [file for file in files if file.endswith('.xlsx')]
-
-    # threads = []
-    # for file_name in xlsx_files:
-    #     if '单独' in file_name:
-    #         print('处理的文件名为：', file_name)
-    #         t = Thread(target=jc, args=(file_name,))
-    #         t.start()
-    #         threads.append(t)
-    # for t in threads:
-    #     t.join()
-
-    # queue = Queue()
-    # Processs = []
-    # for file_name in xlsx_files:
-    #     if '单独' in file_name:
-    #         print('处理的文件名为：', file_name)
-    #         p = Process(target=jc, args=(file_name, queue,))
-    #         p.start()
-    #         Processs.append(p)
-    # for p in Processs:
-    #     p.join()
-    #     p_res = queue.get()
-    #     print('t_data:', p_res)
 
     manager = Manager()
     error_text = manager.dict()
@@ -415,3 +388,7 @@ def xlsx_format_cope():
 if __name__ == '__main__':
     input('只支持英文表格，中文表格请先转换为英文表格，按任意键继续')
     xlsx_format_cope()
+
+# 2023-6-20 更新
+# 1.优化了对image和gallery重复的判断
+# 2.现在是多进程处理，速度更快
