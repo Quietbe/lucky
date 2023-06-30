@@ -36,6 +36,9 @@ class DataFormat:
             # 删除所有链接  "http开头  " 结尾
             pattern = re.compile(r'"http.*?"')
             description = re.sub(pattern, '""', description)
+            # 删除button标签
+            pattern = re.compile(r'<button.*?</button>')
+            description = re.sub(pattern, '', description)
             # 删除图片img标签  忽略换行符
             pattern = re.compile(r'<img.*?>', re.S)
             description = re.sub(pattern, '', description)
@@ -197,6 +200,7 @@ class DataFormat:
             category_list = category.split('||')
             for i in range(len(category_list)):
                 category_list[i] = category_list[i].strip()
+            category_list = [i for i in category_list if i != '']
             category = '||'.join(category_list)
         return category
 
@@ -279,6 +283,14 @@ def xlsx_format_cope():
         file_read['value3'] = ''
     if 'value4' not in file_read.columns:
         file_read['value4'] = ''
+    if 'value5' not in file_read.columns:
+        file_read['value5'] = ''
+    if 'value6' not in file_read.columns:
+        file_read['value6'] = ''
+    if 'value7' not in file_read.columns:
+        file_read['value7'] = ''
+    if 'value8' not in file_read.columns:
+        file_read['value8'] = ''
 
     select_list = []
 
@@ -494,7 +506,8 @@ def xlsx_format_cope():
             for key, value in value1.items():
                 value1_key = key.strip()
                 if value1_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value1_key] = ','.join(value_)
@@ -504,7 +517,8 @@ def xlsx_format_cope():
             for key, value in value2.items():
                 value2_key = key.strip()
                 if value2_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value2_key] = ','.join(value_)
@@ -514,7 +528,8 @@ def xlsx_format_cope():
             for key, value in value3.items():
                 value3_key = key.strip()
                 if value3_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value3_key] = ','.join(value_)
@@ -524,7 +539,8 @@ def xlsx_format_cope():
             for key, value in value4.items():
                 value4_key = key.strip()
                 if value4_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value4_key] = ','.join(value_)
@@ -534,7 +550,8 @@ def xlsx_format_cope():
             for key, value in value5.items():
                 value5_key = key.strip()
                 if value5_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value5_key] = ','.join(value_)
@@ -544,7 +561,8 @@ def xlsx_format_cope():
             for key, value in value6.items():
                 value6_key = key.strip()
                 if value6_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value6_key] = ','.join(value_)
@@ -554,7 +572,8 @@ def xlsx_format_cope():
             for key, value in value7.items():
                 value7_key = key.strip()
                 if value7_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value7_key] = ','.join(value_)
@@ -564,7 +583,8 @@ def xlsx_format_cope():
             for key, value in value8.items():
                 value8_key = key.strip()
                 if value8_key in select_list:
-                    value = [str(i).strip() for i in value if i != '']
+                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
                     select_name[value8_key] = ','.join(value_)
@@ -621,6 +641,7 @@ if __name__ == '__main__':
 # 2.修改了4个多选项列的bug
 # 3.增加了对价格范围删除的处理 3-10000
 # 3.删除了对 描述、品牌 为空的行删除处理的代码
+#
 # 2023-06-14更新：
 # 1.增加了图片切割处理，如果图片链接切割后不是.png或.jpg结尾的，就不切割
 #
@@ -628,3 +649,10 @@ if __name__ == '__main__':
 # 1.增加了多选项的去重排序，保持原有顺序
 # 2.增加了货币标识的输入，如果货币标识为空，就输入货币标识
 # 3.增加了对多选项内容和选项名的处理，避免格式错误
+#
+# 2023-06-30更新：
+# 1.增加了对 Button按钮的删除处理
+# 2.增加了对多选项内容 ，的替换处理，避免格式错误
+# 3.增加了多 category 中空分类的处理
+
+
