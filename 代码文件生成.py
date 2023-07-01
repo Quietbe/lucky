@@ -37,7 +37,7 @@ class DataFormat:
             pattern = re.compile(r'"http.*?"')
             description = re.sub(pattern, '""', description)
             # 删除button标签
-            pattern = re.compile(r'<button.*?</button>')
+            pattern = re.compile(r'<button.*?</button>', re.S)
             description = re.sub(pattern, '', description)
             # 删除图片img标签  忽略换行符
             pattern = re.compile(r'<img.*?>', re.S)
