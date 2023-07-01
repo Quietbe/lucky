@@ -371,7 +371,7 @@ def xlsx_format_cope():
     pool.close()
     pool.join()
     # error_text = dict(error_text)
-    print('error_text:', error_text)
+    # print('error_text:', error_text)
 
     for key, value in error_text.items():
         print(' 文件：' + key)
@@ -381,7 +381,6 @@ def xlsx_format_cope():
             if len(v) > 0:
                 print(k, f'({len(v)}): ', v if len(v) < 10 else v[:10])
         print('错误信息数量：', sum([len(v) for v in value.values()]), '\n')
-
     input("按任意键退出")
 
 

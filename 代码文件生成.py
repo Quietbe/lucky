@@ -506,7 +506,7 @@ def xlsx_format_cope():
             for key, value in value1.items():
                 value1_key = key.strip()
                 if value1_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -517,7 +517,7 @@ def xlsx_format_cope():
             for key, value in value2.items():
                 value2_key = key.strip()
                 if value2_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -528,7 +528,7 @@ def xlsx_format_cope():
             for key, value in value3.items():
                 value3_key = key.strip()
                 if value3_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -539,7 +539,7 @@ def xlsx_format_cope():
             for key, value in value4.items():
                 value4_key = key.strip()
                 if value4_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -550,7 +550,7 @@ def xlsx_format_cope():
             for key, value in value5.items():
                 value5_key = key.strip()
                 if value5_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -561,7 +561,7 @@ def xlsx_format_cope():
             for key, value in value6.items():
                 value6_key = key.strip()
                 if value6_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -572,7 +572,7 @@ def xlsx_format_cope():
             for key, value in value7.items():
                 value7_key = key.strip()
                 if value7_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -583,7 +583,7 @@ def xlsx_format_cope():
             for key, value in value8.items():
                 value8_key = key.strip()
                 if value8_key in select_list:
-                    value = [str(i).strip().replace(',', ' ') for i in value if i != '']
+                    value = [str(i).strip().replace(',', '.') for i in value if i != '']
                     value = [i for i in value if i != '']
                     value_ = list(set(value))
                     value_.sort(key=value.index)
@@ -652,7 +652,7 @@ if __name__ == '__main__':
 #
 # 2023-06-30更新：
 # 1.增加了对 Button按钮的删除处理
-# 2.增加了对多选项内容 ，的替换处理，避免格式错误
+# 2.增加了对多选项内容 ，的替换成 . 处理，避免格式错误
 # 3.增加了多 category 中空分类的处理
 
 
