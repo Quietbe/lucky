@@ -469,11 +469,11 @@ def xlsx_format_cope():
 
     # 当前的表格形式：PageUrl	ID	title	brand	category	productid	image	gallery	value1	value2	value3	sku	price	sprice	description	money
 
-    index = ['PageUrl', 'ID', 'title', 'brand', 'category', 'productid', 'image', 'gallery']
+    index = ['ID', 'title', 'brand', 'category', 'productid', 'image', 'gallery']
     for select in select_list:
         # print(select)
         index.append(select)
-    index = index + ['sku', 'price', 'sprice', 'description']
+    index = index + ['sku', 'price', 'sprice', 'description', 'PageUrl']
     # print("index:", index)
     print(file_read)
     pd2 = pd.DataFrame(columns=index)
@@ -589,8 +589,8 @@ def xlsx_format_cope():
                     value_.sort(key=value.index)
                     select_name[value8_key] = ','.join(value_)
 
-        data = [Pageurl, '', title, brand, category, '', image, gallery] + list(select_name.values()) + ['', price, '',
-                                                                                                         description]
+        data = ['', title, brand, category, '', image, gallery] + list(select_name.values()) + \
+               ['', price, '', description, Pageurl]
         # print(f"当前是第{i}个")
         pd2.loc[i] = data
 
