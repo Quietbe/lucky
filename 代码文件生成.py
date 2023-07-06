@@ -75,7 +75,10 @@ class DataFormat:
             # 删除 字母开头 .com结尾的所有链接
             pattern = re.compile(r'\b[a-zA-Z].*?\.com')
             description = re.sub(pattern, '', description)
-            # 删除 字母开头 .com结尾的所有链接
+            # 删除大写字母开头 .COM结尾的所有链接
+            pattern = re.compile(r'\b[A-Z]+\.COM')
+            description = re.sub(pattern, '', description)
+            # 删除 字母开头 .html结尾的所有链接
             pattern = re.compile(r'\b[a-zA-Z].*?\.html')
             description = re.sub(pattern, '', description)
             # 替换svg标签 为span
@@ -654,5 +657,6 @@ if __name__ == '__main__':
 # 1.增加了对 Button按钮的删除处理
 # 2.增加了对多选项内容 ，的替换成 . 处理，避免格式错误
 # 3.增加了多 category 中空分类的处理
-
+# 2023-07-05更新：
+# 1.增加了对大写 AABC.COM 内容的删除
 
