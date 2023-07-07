@@ -73,7 +73,7 @@ class DataFormat:
             pattern = r'\b((?:http?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s\[\]{};:\'".,<>?«»“”‘’]))'
             description = re.sub(pattern, '', description)
             # 删除 字母开头 .com结尾的所有链接
-            pattern = re.compile(r'\b[a-zA-Z].*?\.com')
+            pattern = re.compile(r'\b[a-zA-Z]+\.com')
             description = re.sub(pattern, '', description)
             # 删除大写字母开头 .COM结尾的所有链接
             pattern = re.compile(r'\b[A-Z]+\.COM')
