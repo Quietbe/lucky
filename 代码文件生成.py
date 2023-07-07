@@ -48,6 +48,9 @@ class DataFormat:
             # 删除iframe标签
             pattern = re.compile(r'<iframe.*?</iframe>')
             description = re.sub(pattern, '', description)
+            # 删除input标签
+            pattern = re.compile(r'<input.*?>', re.S)
+            description = re.sub(pattern, '', description)
             # 删除手机号   xxx-xxx-xxxx
             pattern = re.compile(r'\d*-\d*-\d*')
             description = re.sub(pattern, '', description)
@@ -659,4 +662,6 @@ if __name__ == '__main__':
 # 3.增加了多 category 中空分类的处理
 # 2023-07-05更新：
 # 1.增加了对大写 AABC.COM 内容的删除
+# 2023-07-07更新：
+# 1.增加了对input标签的删除
 
