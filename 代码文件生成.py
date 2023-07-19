@@ -51,11 +51,20 @@ class DataFormat:
             # 删除input标签
             pattern = re.compile(r'<input.*?>', re.S)
             description = re.sub(pattern, '', description)
+            # 删除script标签
+            pattern = re.compile(r'<script.*?</script>', re.S)
+            description = re.sub(pattern, '', description)
+            # 删除div标签
+            pattern = re.compile(r'<div.*?>')
+            description = re.sub(pattern, '', description)
+            pattern = re.compile(r'</div>')
+            description = re.sub(pattern, '', description)
+            description = description.strip()
             # 删除手机号   xxx-xxx-xxxx
-            pattern = re.compile(r'\d*-\d*-\d*')
+            pattern = re.compile(r'\d+-\d+-\d+')
             description = re.sub(pattern, '', description)
             # 删除手机号   xxx-xxx
-            pattern = re.compile(r'\d*-\d*')
+            pattern = re.compile(r'\d+-\d+')
             description = re.sub(pattern, '', description)
             # 删除邮箱
             pattern = re.compile(r'\w*@\w*\.\w*')
@@ -87,12 +96,6 @@ class DataFormat:
             # 替换svg标签 为span
             pattern = re.compile(r'<svg.*?</svg>')
             description = re.sub(pattern, '', description)
-            # 删除div标签
-            pattern = re.compile(r'<div.*?>')
-            description = re.sub(pattern, '', description)
-            pattern = re.compile(r'</div>')
-            description = re.sub(pattern, '', description)
-            description = description.strip()
             # 删除中文
             pattern = re.compile(r'[\u4e00-\u9fa5]')
             description = re.sub(pattern, '', description)
@@ -664,4 +667,6 @@ if __name__ == '__main__':
 # 1.增加了对大写 AABC.COM 内容的删除
 # 2023-07-07更新：
 # 1.增加了对input标签的删除
+# 2023-07-17更新：
+# 1.添加了描述对script标签的删除
 
