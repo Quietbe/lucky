@@ -159,7 +159,8 @@ class DataFormat:
             return gallery
         if gallery is not None and gallery != '':
             gallery_list = gallery.split(';')
-            gallery_list.remove('')
+            if '' in gallery_list:
+                gallery_list.remove('')
             for i in range(len(gallery_list)):
                 gallery_list[i] = self.image_format(gallery_list[i])
             gallery_list = list(set(gallery_list))
