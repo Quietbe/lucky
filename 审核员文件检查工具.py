@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, \
     QFileDialog, QMessageBox
 import pandas as pd
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineView  # pip install PyQtWebEngine
 import tkinter as tk
 import jinja2
 
@@ -23,21 +23,18 @@ def render_html(data):
     print('删除完成')
     print("select_data_list", select_data_list)
     # data = data.to_dict(na_action='null')
-    data["产品图片"] = data["产品图片"].split(';')
+    data["产品图片"] = data["产品图片"].split(';')  # if data['产品图片'] != '' else []
     print('产品图片', data["产品图片"])
     print(data)
     template = """ 
     <html>
     <body>
-        <p> {{ data['产品分类'] }}  </p?>
-      <h1>{{data["产品名称"]}}</h1>
         <p>产品链接: </p>
         <a href="{{data['PageUrl']}}" target="_blank">{{data["PageUrl"]}}</a>
-        <h2>产品图片</h2>
-        <img src="{{data["产品封面"]}}" style='max-width: 200px;'>
-        {% for img in data["产品图片"] %}
-        <img src="{{ img }}" style='max-width: 200px;'>
-        {% endfor %}
+        <hr>
+        <p> {{ data['产品分类'] }}  </p?>
+        <hr>
+        <h1>{{data["产品名称"]}}</h1>
         <hr>
         <h3>品牌: {{data["品牌名称"]}}</h3>
         <hr>
@@ -52,10 +49,42 @@ def render_html(data):
             {% endfor %}
             <hr>
         {% endfor %}
+        <hr>
+        <h2>产品图片</h2>
+        <img class="myImage" src="{{data["产品封面"]}}" alt='123' style="max-width: 200px;">
+        <p class="imageSize"></p>
+        <div style="display: flex;flex-wrap: wrap;">
+        {% for img in data["产品图片"] %}
+            <div>
+            <img class="myImage" src="{{ img }}" style="max-width: 200px;">
+            <p class="imageSize"></p>
+            </div>
+        {% endfor %}
+        </div>    
+        <script>
+        // 使用 window.onload 事件确保页面和资源加载完成后执行
+        window.onload = function () {
+            // 获取所有带有 "myImage" 类的图像元素
+            var images = document.getElementsByClassName('myImage');
+
+            // 遍历所有图像元素
+            for (var i = 0; i < images.length; i++) {
+                // 创建一个新的Image对象以获取图像的尺寸
+                var imgSize = new Image();
+                imgSize.src = images[i].src;
+                // 获取与当前图像关联的 p 标签
+                var pElement = document.getElementsByClassName('imageSize')[i];
+                var imageWidth = imgSize.width;
+                var imageHeight = imgSize.height;
+                // 更新 p 标签的文本以显示图像的大小
+                // pElement.textContent = 'Width: ' + imageWidth + 'px, Height: ' + imageHeight + 'px';
+                pElement.textContent = 'Size: ' + imageWidth + 'x' + imageHeight;
+            }
+        };
+        </script>
     </body>
     </html>
     """
-    # https://www.revitsport.com/us_en/race-leathers-argon-2-black-white		One Piece Argon 2		Men||Motorcycle Suits	https://www.revitsport.com/media/catalog/product/2/0/20230101-060738_FOL037-One-Piece-Argon-2-Black-White-front-jpg.jpg	https://www.revitsport.com/media/catalog/product/2/0/20230101-060748_FOL037-One-Piece-Argon-2-Black-White-back-jpg.jpg		999.99		USD	The Argon 2 racing suit has a bold, figure-hugging profile constructed from Monaco cowhide, assuring rugged protection from abrasion-resistant leather to keep the luster lasting longer. When you’re setting the pace, PWR|Shell stretch textile liberates your motion, giving you more range to shift riding position as you hold the racing line. And when you’re chasing that lowest lap time, knitted 3D spacer mesh and a perforated outer shell both ventilate and cool you as the track heats up.<br><br>Tailor-made protection<br>With AAA-standard Betac® protection at shoulders, knees, and elbows – this is CE-rated kit designed to take to the track. Protector pockets in this high-safety spec REV'IT! one-piece provides race-ready options of SEESOFT back and split chest protectors. SEESMART hip protection is lightweight and ventilated, and safety seams throughout the suit add inner strength – keeping the outer shell panels tightly fused together.<br><br>Pure race aesthetics<br>Argon 2 is what happens when all-round style meets substance. Feel the part with a look inspired by professional racing leathers – we’re talking outspoken colors, bold graphics, and shoulder armor straight out of MotoGP. Because when you look good, you feel good. And when you feel good, you take to the track with that extra bit of confidence and conviction.						46,48,50,52,54,56	standard
 
     template = jinja2.Template(template)
     return template.render(data=data, select_data_list=select_data_list)
