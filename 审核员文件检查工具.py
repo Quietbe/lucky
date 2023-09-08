@@ -1,13 +1,14 @@
 import sys
 from functools import partial
-
-from PyQt5.QtCore import Qt
+from os import startfile
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, \
-    QFileDialog, QMessageBox
-import pandas as pd
+    QFileDialog, QStatusBar
+from pandas import read_excel
 from PyQt5.QtWebEngineWidgets import QWebEngineView  # pip install PyQtWebEngine
 import tkinter as tk
-import jinja2
+# import jinja2
+from jinja2 import Template
 
 
 def render_html(data):
@@ -40,8 +41,6 @@ def render_html(data):
         <hr>
         <h3>价格:  {{data["产品价格"]}}  {{data["货币标识"]}}</h3>
         <hr>
-        <div>{{data["产品描述"]}}</div>
-        <hr>
         {% for key,val in select_data_list.items() %}
             <h3>{{key}}:  {{val}}</h3>
             {% for option in val.split(',') %}
@@ -49,6 +48,8 @@ def render_html(data):
             {% endfor %}
             <hr>
         {% endfor %}
+        <hr>
+        <div>{{data["产品描述"]}}</div>
         <hr>
         <h2>产品图片</h2>
         <img class="myImage" src="{{data["产品封面"]}}" alt='123' style="max-width: 200px;">
@@ -86,7 +87,8 @@ def render_html(data):
     </html>
     """
 
-    template = jinja2.Template(template)
+    # template = jinja2.Template(template)
+    template = Template(template)
     return template.render(data=data, select_data_list=select_data_list)
 
 
@@ -113,12 +115,22 @@ class Window(QWidget):
         self.cope_url = tk.Tk()
         self.cope_url.withdraw()
 
+        # # 窗口URl展示
+        # self.statusBar = QStatusBar()
+        # self.setStatusBar(self.statusBar)
+        # self.browser2.urlChanged.connect(self.update_urlbar)
+        # central_widget = QWidget()
+        # self.setCentralWidget(central_widget)
+        # central_widget.setLayout(QVBoxLayout())
+        # central_widget.layout().addWidget(self.browser2)
+
+
     def loadFile(self):
         # self.table = QTableWidget()
         path, _ = QFileDialog.getOpenFileName(self, '选择文件', '', 'Excel files(*.xlsx , *.xls)')
 
         if path:
-            df = pd.read_excel(path)
+            df = read_excel(path)
             # 删除 id 列
             df = df.drop(['ID', '产品SKU', '折扣价格', '产品简介', 'SEO标题', 'SEO描述', 'SEO标签', '多选项'], axis=1)
             self.df = df
@@ -149,6 +161,10 @@ class Window(QWidget):
                     self.table.setItem(i, j, QTableWidgetItem(str(df.iloc[i, j])))
             self.table.setHorizontalHeaderLabels(df.columns)
 
+    def update_urlbar(self, url):
+        self.statusBar.showMessage(url.toString())
+
+
     def checkRow(self, row):
         print('当前点击的行数:', row)
         data = self.df.iloc[row]
@@ -159,6 +175,7 @@ class Window(QWidget):
         self.cope_url.clipboard_append(data['PageUrl'])
         # self.cope_url.destroy()
 
+        """渲染Web"""
         html = render_html(data)  # 使用data渲染模板
         self.window = QWidget()
         self.window.setWindowTitle('商品详情')
@@ -170,9 +187,36 @@ class Window(QWidget):
         # self.window.setGeometry(1, 40, 800, 600)
         # 设置窗口放在左上角
         self.window.move(1, 1)
+        # 设置窗口的透明度为0.5
+        self.window.setWindowOpacity(0.95)
         # 设置置顶
         self.window.setWindowFlags(self.window.windowFlags() | Qt.WindowStaysOnTopHint)
         self.window.show()
+
+        """展示原来网页"""
+        # self.window2 = QWidget()
+        # self.window2.setWindowTitle('商品详情')
+        # self.browser2 = QWebEngineView()
+        # self.browser2.load(QUrl(data['PageUrl']))
+        # self.window2.setLayout(QVBoxLayout())
+        # self.window2.layout().addWidget(self.browser2)
+        # # 设置窗口位置
+        # # self.window2.setGeometry(1, 1, 800, 1200)
+        # # 设置窗口放在左上角
+        # # self.window2.move(800, 1)
+        # # 设置置顶
+        # # self.window2.setWindowFlags(self.window2.windowFlags() | Qt.WindowStaysOnTopHint)
+        # # 全屏
+        # desktop = QApplication.desktop()
+        # screenRect = desktop.screenGeometry()
+        # height = screenRect.height()
+        # width = screenRect.width()
+        # self.window2.resize(width, height)
+        # self.window2.show()
+        """浏览器唤醒"""
+        # from os import startfile
+        startfile(data['PageUrl'])
+
 
 
 if __name__ == '__main__':
